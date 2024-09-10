@@ -1,26 +1,18 @@
-var http = require("http");
-var url = require("url");
-var fs = require("fs");
+const express = require("express");
+const path = require("path");
 
-http
-  .createServer(function (req, res) {
-    const myURL = url.parse(req.url, true);
+const app = express();
+const PORT = 3000;
 
-    const filename =
-      myURL.pathname === "/" ? "./index.html" : "." + myURL.pathname + ".html";
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "/index.html"));
+});
 
-    fs.readFile(filename, function (err, data) {
-      if (err) {
-        fs.readFile("./404.html", (err, data) => {
-          res.writeHead(404, { "Content-Type": "text/html" });
-          res.write(data);
-          res.end();
-        });
-        return;
-      }
-      res.writeHead(200, { "Content-Type": "text/html" });
-      res.write(data);
-      res.end();
-    });
-  })
-  .listen(8080);
+app.get("/:route", (req, res) => {
+  const route = req.params.route;
+  if (route === "about" || route === "contact-me")
+    res.sendFile(path.join(__dirname, `/${route}.html`));
+  else res.sendFile(path.join(__dirname, "/404.html"));
+});
+
+app.listen(PORT);
